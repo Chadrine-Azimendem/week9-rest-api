@@ -1,4 +1,5 @@
 const User = require("./userModel");
+const jwt = require("jsonwebtoken");
 
 // controller
 exports.createUser = async (req, res) => {
@@ -23,7 +24,7 @@ exports.readUsers = async (req, res) => {
   }
 };
 
-// 2 controllers for update and delete
+// update field (make it dynamic)
 
 exports.updateUser = async (req, res) => {
   try {
@@ -50,6 +51,26 @@ exports.deleteUser = async (req, res) => {
     res.status(200).send({ password: "User successfully deleted" });
   } catch (error) {
     console.log(error);
+    res.status(500).send({ error: error.message });
+  }
+};
+
+//POST
+//http://localhost:5001/login
+// {
+//     "username" : "test1",
+//     "password": "password123"
+// }
+exports.loginUser = async (req, res) => {
+  console.log("middleware passed and controller has been called");
+  try {
+    const user = await User.findOne({ username: req.body.username });
+    const token = await jwt.sign({ _id: user._id }, process.env.SECRET);
+    console.log(token);
+    res.status(200).send({ username: user.username, token });
+  } catch (error) {
+    console.log(error);
+    console.log("username not found");
     res.status(500).send({ error: error.message });
   }
 };
